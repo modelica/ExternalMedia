@@ -306,6 +306,10 @@ void CoolPropSolver::postStateChange(ExternalThermodynamicState *const propertie
                 }
             }
         }
+        catch(CoolProp::ValueError &e)
+        {
+            warningMessage((char*)e.what());
+        }        
         catch(std::exception &e)
         {
             errorMessage((char*)e.what());
@@ -337,6 +341,10 @@ void CoolPropSolver::postStateChange(ExternalThermodynamicState *const propertie
                 properties->lambda = NAN;
             }
         }
+        catch(CoolProp::ValueError &e)
+        {
+            warningMessage((char*)e.what());
+        }        
         catch(std::exception &e)
         {
             errorMessage((char*)e.what());
@@ -427,8 +435,10 @@ void CoolPropSolver::setSat_p(double &p, ExternalSaturationProperties *const pro
 		  state->clear();
           state->unspecify_phase();
 
-	  } catch(std::exception &e) {
-		errorMessage((char*)e.what());
+	  } catch(CoolProp::ValueError &e) {
+            warningMessage((char*)e.what());
+          } catch(std::exception &e) {
+	    errorMessage((char*)e.what());
 	  }
     }
 }
@@ -484,7 +494,9 @@ void CoolPropSolver::setSat_T(double &T, ExternalSaturationProperties *const pro
 		  properties->sv    = state->smass();    // Specific entropy at dew line (for pressure ps)
 		  // state->specify_phase(CoolProp::iphase_not_imposed);
 
-	  } catch(std::exception &e) {
+	  } catch(CoolProp::ValueError &e){
+                warningMessage((char*)e.what());
+          } catch(std::exception &e) {
 		errorMessage((char*)e.what());
 	  }
 	}
@@ -532,13 +544,16 @@ void CoolPropSolver::setState_ph(double &p, double &h, int &phase, ExternalTherm
 		{
 			throw CoolProp::ValueError(format("p-h [%g, %g] failed for update",p,h));
 		}
-
-		// Set the values in the output structure
+        // Set the values in the output structure
 		this->postStateChange(properties);
 	}
+        catch(CoolProp::ValueError &e)
+        {
+          warningMessage((char*)e.what());
+        }        
 	catch(std::exception &e)
 	{
-		errorMessage((char*)e.what());
+	  errorMessage((char*)e.what());
 	}
 }
 
@@ -553,12 +568,16 @@ void CoolPropSolver::setState_pT(double &p, double &T, ExternalThermodynamicStat
 		// Update the internal variables in the state instance
 		state->update(CoolProp::PT_INPUTS,p,T);
 
-		// Set the values in the output structure
+        // Set the values in the output structure
 		this->postStateChange(properties);
 	}
+        catch(CoolProp::ValueError &e)
+        {
+            warningMessage((char*)e.what());
+        }        
 	catch(std::exception &e)
 	{
-		errorMessage((char*)e.what());
+            errorMessage((char*)e.what());
 	}
 }
 
@@ -579,6 +598,10 @@ void CoolPropSolver::setState_dT(double &d, double &T, int &phase, ExternalTherm
 		// Set the values in the output structure
 		this->postStateChange(properties);
 	}
+        catch(CoolProp::ValueError &e)
+        {
+                warningMessage((char*)e.what());
+        }        
 	catch(std::exception &e)
 	{
 		errorMessage((char*)e.what());
@@ -600,6 +623,10 @@ void CoolPropSolver::setState_ps(double &p, double &s, int &phase, ExternalTherm
 		// Set the values in the output structure
 		this->postStateChange(properties);
 	}
+        catch(CoolProp::ValueError &e)
+        {
+                warningMessage((char*)e.what());
+        }        
 	catch(std::exception &e)
 	{
 		errorMessage((char*)e.what());
@@ -622,9 +649,13 @@ void CoolPropSolver::setState_hs(double &h, double &s, int &phase, ExternalTherm
 		// Set the values in the output structure
 		this->postStateChange(properties);
 	}
+        catch(CoolProp::ValueError &e)
+        {
+            warningMessage((char*)e.what());
+        }        
 	catch(std::exception &e)
 	{
-		errorMessage((char*)e.what());
+            errorMessage((char*)e.what());
 	}
 }
 
@@ -640,7 +671,9 @@ double CoolPropSolver::partialDeriv_state(const string &of, const string &wrt, c
 		state->update(CoolProp::DmassT_INPUTS,properties->d,properties->T);
 		// Get the output value
 		res = state->keyed_output(static_cast<CoolProp::parameters>(derivTerm));
-	} catch(std::exception &e) {
+        } catch(CoolProp::ValueError &e) {
+            warningMessage((char*)e.what());
+        } catch(std::exception &e) {
 		errorMessage((char*)e.what());
 	}
 	return res;
